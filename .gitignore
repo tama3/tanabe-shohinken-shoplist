@@ -1,0 +1,6 @@
+# WSL / Windows のメタデータ
+*:Zone.Identifier
+
+# OS / エディタ
+.DS_Store
+Thumbs.db

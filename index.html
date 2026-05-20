@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>田辺市商品券 取扱店舗検索</title>
+<meta name="description" content="田辺市商品券事業の取扱店舗を地区・業種・キーワードで検索できます。">
+<meta name="theme-color" content="#FF7BA9">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+<style>
+  :root {
+    --pink: #FF7BA9;
+    --pink-deep: #E85A8A;
+    --pink-light: #FFD6E5;
+    --pink-bg: #FFF6F0;
+    --peach: #FF9F6B;
+    --peach-bg: #FFE7D6;
+    --mint: #4FBFB0;
+    --mint-bg: #DFF7F2;
+    --lavender-bg: #EFE6FF;
+    --lavender: #9B7FD8;
+    --text: #4A3540;
+    --text-soft: #8A6E7D;
+    --white: #FFFFFF;
+    --shadow-sm: 0 2px 6px rgba(255, 123, 169, 0.12);
+    --shadow-md: 0 4px 14px rgba(255, 123, 169, 0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", system-ui, -apple-system, sans-serif;
+    background: var(--pink-bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #FF93BC 0%, var(--pink) 50%, #FF9F6B 100%);
+    color: white;
+    padding: 20px 18px 18px;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    box-shadow: var(--shadow-md);
+  }
+  header h1 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  header .subtitle {
+    font-size: 0.78rem;
+    opacity: 0.95;
+    margin-top: 2px;
+  }
+  .controls {
+    background: white;
+    padding: 14px 16px 12px;
+    margin: 0 12px;
+    margin-top: -8px;
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 10;
+  }
+  .search-wrap { position: relative; }
+  .search-box {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border: 2px solid var(--pink-light);
+    border-radius: 24px;
+    font-size: 16px;
+    font-family: inherit;
+    background: var(--pink-bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .search-box::placeholder { color: #C9A4B5; }
+  .search-box:focus { border-color: var(--pink); background: white; }
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.05rem;
+    pointer-events: none;
+  }
+  .search-clear {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: var(--pink-light);
+    color: var(--pink-deep);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .search-clear.show { display: flex; }
+  .filter-group { margin-top: 12px; }
+  .filter-label {
+    font-size: 0.75rem;
+    color: var(--text-soft);
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 0.05em;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    padding: 6px 12px;
+    border-radius: 18px;
+    border: 1.5px solid var(--pink-light);
+    background: white;
+    font-size: 0.78rem;
+    font-family: inherit;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: all 0.12s ease-out;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .chip:hover { border-color: var(--pink); color: var(--pink-deep); }
+  .chip.active {
+    background: var(--pink);
+    color: white;
+    border-color: var(--pink);
+    box-shadow: 0 2px 6px rgba(255, 123, 169, 0.35);
+  }
+  .meta {
+    padding: 14px 18px 8px;
+    font-size: 0.82rem;
+    color: var(--text-soft);
+  }
+  .meta strong { color: var(--pink-deep); font-weight: 700; font-size: 1.05rem; }
+  .reset-btn {
+    float: right;
+    border: none;
+    background: transparent;
+    color: var(--lavender);
+    font-size: 0.78rem;
+    cursor: pointer;
+    text-decoration: underline;
+    font-family: inherit;
+    display: none;
+  }
+  .reset-btn.show { display: inline-block; }
+  .cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 12px;
+  }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.1s;
+  }
+  .card:active { transform: scale(0.99); }
+  .card-name {
+    font-weight: 700;
+    font-size: 0.98rem;
+    margin-bottom: 6px;
+    color: var(--text);
+    word-break: break-word;
+  }
+  .card-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 11px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .badge-cat { background: var(--pink-light); color: var(--pink-deep); }
+  .badge-area { background: var(--peach-bg); color: var(--peach); }
+  .badge-place { background: var(--mint-bg); color: var(--mint); }
+  .card-items {
+    font-size: 0.82rem;
+    color: var(--text-soft);
+    margin-top: 2px;
+  }
+  .empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-soft);
+  }
+  .empty-icon { font-size: 2.8rem; margin-bottom: 10px; }
+  .empty-text { font-size: 0.9rem; }
+  mark {
+    background: linear-gradient(transparent 60%, var(--pink-light) 60%);
+    color: var(--pink-deep);
+    font-weight: 700;
+    padding: 0 1px;
+  }
+  footer {
+    text-align: center;
+    padding: 24px 16px 8px;
+    font-size: 0.72rem;
+    color: var(--text-soft);
+  }
+
+  @media (min-width: 720px) {
+    body { max-width: 760px; margin: 0 auto; background: var(--pink-bg); }
+    header { border-radius: 0 0 24px 24px; }
+    header h1 { font-size: 1.45rem; }
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌸 田辺市商品券 取扱店舗</h1>
+  <div class="subtitle" id="totalCount">読み込み中…</div>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-box" id="searchInput" type="search" placeholder="店舗名・地名・品目で検索（例: パン、コンビニ、酒）" autocomplete="off" enterkeyhint="search">
+    <button class="search-clear" id="clearBtn" type="button" aria-label="検索クリア">✕</button>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">📍 地区</div>
+    <div class="chips" id="areaChips"></div>
+  </div>
+  <div class="filter-group">
+    <div class="filter-label">🏷️ 業種</div>
+    <div class="chips" id="categoryChips"></div>
+  </div>
+</div>
+
+<div class="meta" id="meta">
+  <span id="metaText"></span>
+  <button class="reset-btn" id="resetBtn" type="button">条件をクリア</button>
+</div>
+<div class="cards" id="cards"></div>
+<footer>データ: 田辺市商品券事業 取扱店舗一覧</footer>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  const smallKana = { 'ぁ':'あ','ぃ':'い','ぅ':'う','ぇ':'え','ぉ':'お','っ':'つ','ゃ':'や','ゅ':'ゆ','ょ':'よ','ゎ':'わ' };
+  function normalize(s) {
+    if (!s) return '';
+    return s
+      .toLowerCase()
+      .replace(/[Ａ-Ｚａ-ｚ０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
+      .replace(/[ァ-ヶ]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60))
+      .replace(/[ぁぃぅぇぉっゃゅょゎ]/g, ch => smallKana[ch])
+      .replace(/[ー\-‐-―－\s　・･（）()\[\]【】「」『』.,。、！!？?／/&＆'']/g, '');
+  }
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  const data = window.STORES || [];
+  const state = { query: '', areas: new Set(), categories: new Set() };
+
+  const $ = id => document.getElementById(id);
+  const searchInput = $('searchInput');
+  const clearBtn = $('clearBtn');
+  const resetBtn = $('resetBtn');
+
+  function buildChips(elId, items, set) {
+    const el = $(elId);
+    el.innerHTML = items.map(v => `<button type="button" class="chip" data-value="${escapeHtml(v)}">${escapeHtml(v)}</button>`).join('');
+    el.addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      const v = chip.dataset.value;
+      if (set.has(v)) { set.delete(v); chip.classList.remove('active'); }
+      else { set.add(v); chip.classList.add('active'); }
+      apply();
+    });
+  }
+
+  function apply() {
+    const tokens = normalize(state.query).split(/\s+/).filter(Boolean);
+    const filtered = data.filter(d => {
+      if (state.areas.size && !state.areas.has(d.area)) return false;
+      if (state.categories.size && !state.categories.has(d.category)) return false;
+      if (tokens.length && !tokens.every(t => d._s.includes(t))) return false;
+      return true;
+    });
+    render(filtered, tokens.length > 0 ? state.query : '');
+    syncURL();
+    updateResetBtn();
+  }
+
+  function highlight(text, query) {
+    if (!query) return escapeHtml(text);
+    const tokens = query.split(/\s+/).filter(Boolean);
+    if (!tokens.length) return escapeHtml(text);
+    // Build a positional highlight by scanning normalized form
+    const normText = normalize(text);
+    const escaped = escapeHtml(text);
+    // Simple approach: highlight each raw token if it occurs in raw text (case-insensitive)
+    let out = escaped;
+    for (const t of tokens) {
+      if (!t) continue;
+      const safe = t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      out = out.replace(new RegExp(safe, 'gi'), m => `<mark>${m}</mark>`);
+    }
+    return out;
+  }
+
+  function render(items, query) {
+    const meta = $('metaText');
+    const cards = $('cards');
+    const hasFilter = state.query || state.areas.size || state.categories.size;
+    meta.innerHTML = hasFilter
+      ? `<strong>${items.length}</strong>件ヒット / 全${data.length}店舗`
+      : `全<strong>${data.length}</strong>店舗を表示中`;
+
+    if (items.length === 0) {
+      cards.innerHTML = `<div class="empty"><div class="empty-icon">🍵</div><div class="empty-text">該当する店舗が見つかりませんでした<br>検索ワードや絞り込みを変えてみてください</div></div>`;
+      return;
+    }
+    const html = items.map(d => `
+      <div class="card">
+        <div class="card-name">${highlight(d.name, query)}</div>
+        <div class="card-meta">
+          <span class="badge badge-cat">${escapeHtml(d.category)}</span>
+          <span class="badge badge-area">${escapeHtml(d.area)}</span>
+          <span class="badge badge-place">📍 ${escapeHtml(d.place)}</span>
+        </div>
+        <div class="card-items">🛍 ${highlight(d.items, query)}</div>
+      </div>
+    `).join('');
+    cards.innerHTML = html;
+  }
+
+  function syncURL() {
+    const p = new URLSearchParams();
+    if (state.query) p.set('q', state.query);
+    if (state.areas.size) p.set('area', [...state.areas].join(','));
+    if (state.categories.size) p.set('cat', [...state.categories].join(','));
+    const qs = p.toString();
+    history.replaceState(null, '', qs ? '?' + qs : location.pathname);
+  }
+
+  function restoreFromURL() {
+    const p = new URLSearchParams(location.search);
+    if (p.has('q')) { state.query = p.get('q'); searchInput.value = state.query; }
+    if (p.has('area')) p.get('area').split(',').filter(Boolean).forEach(a => state.areas.add(a));
+    if (p.has('cat')) p.get('cat').split(',').filter(Boolean).forEach(c => state.categories.add(c));
+  }
+
+  function updateResetBtn() {
+    const has = state.query || state.areas.size || state.categories.size;
+    resetBtn.classList.toggle('show', !!has);
+    clearBtn.classList.toggle('show', !!state.query);
+  }
+
+  function resetAll() {
+    state.query = '';
+    state.areas.clear();
+    state.categories.clear();
+    searchInput.value = '';
+    document.querySelectorAll('.chip.active').forEach(c => c.classList.remove('active'));
+    apply();
+  }
+
+  // Init
+  $('totalCount').textContent = `${data.length}店舗を検索`;
+
+  const areas = [...new Set(data.map(d => d.area))];
+  const categories = [...new Set(data.map(d => d.category))];
+  buildChips('areaChips', areas, state.areas);
+  buildChips('categoryChips', categories, state.categories);
+
+  restoreFromURL();
+  // Activate restored chips
+  document.querySelectorAll('#areaChips .chip').forEach(c => { if (state.areas.has(c.dataset.value)) c.classList.add('active'); });
+  document.querySelectorAll('#categoryChips .chip').forEach(c => { if (state.categories.has(c.dataset.value)) c.classList.add('active'); });
+
+  let debounceTimer;
+  searchInput.addEventListener('input', e => {
+    state.query = e.target.value;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(apply, 80);
+  });
+  clearBtn.addEventListener('click', () => {
+    state.query = '';
+    searchInput.value = '';
+    searchInput.focus();
+    apply();
+  });
+  resetBtn.addEventListener('click', resetAll);
+
+  apply();
+})();
+</script>
+</body>
+</html>
