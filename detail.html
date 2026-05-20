@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>店舗詳細 | 田辺市商品券 取扱店舗検索</title>
+<meta name="description" content="田辺市商品券事業の取扱店舗の詳細と地図。">
+<meta name="theme-color" content="#FF7BA9">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌸</text></svg>">
+<style>
+  :root {
+    --pink: #FF7BA9;
+    --pink-deep: #E85A8A;
+    --pink-light: #FFD6E5;
+    --pink-bg: #FFF6F0;
+    --peach: #FF9F6B;
+    --peach-bg: #FFE7D6;
+    --mint: #4FBFB0;
+    --mint-bg: #DFF7F2;
+    --text: #4A3540;
+    --text-soft: #8A6E7D;
+    --shadow-sm: 0 2px 6px rgba(255, 123, 169, 0.12);
+    --shadow-md: 0 4px 14px rgba(255, 123, 169, 0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    font-family: "Hiragino Maru Gothic ProN", "Hiragino Sans", "Yu Gothic UI", "Meiryo", system-ui, -apple-system, sans-serif;
+    background: var(--pink-bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding-bottom: 40px;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #FF93BC 0%, var(--pink) 50%, #FF9F6B 100%);
+    color: white;
+    padding: 16px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow-md);
+  }
+  .back-btn {
+    border: none;
+    background: rgba(255, 255, 255, 0.25);
+    color: white;
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 6px 12px;
+    border-radius: 16px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .back-btn:active { opacity: 0.7; }
+  header .title { font-size: 1rem; font-weight: 700; }
+  .wrap { padding: 0 12px; }
+  .panel {
+    background: white;
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    margin-top: 14px;
+    padding: 16px 16px 14px;
+  }
+  .store-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    word-break: break-word;
+    margin-bottom: 10px;
+  }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .badge {
+    display: inline-block;
+    padding: 3px 11px;
+    border-radius: 12px;
+    font-size: 0.76rem;
+    font-weight: 600;
+  }
+  .badge-cat { background: var(--pink-light); color: var(--pink-deep); }
+  .badge-area { background: var(--peach-bg); color: var(--peach); }
+  .badge-place { background: var(--mint-bg); color: var(--mint); }
+  .items {
+    font-size: 0.9rem;
+    color: var(--text-soft);
+    margin-bottom: 4px;
+  }
+  .map-frame {
+    margin-top: 14px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    background: var(--pink-bg);
+  }
+  .map-frame iframe {
+    display: block;
+    width: 100%;
+    height: 320px;
+    border: 0;
+  }
+  .map-actions { margin-top: 12px; }
+  .map-link-btn {
+    display: block;
+    text-align: center;
+    background: var(--pink);
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.9rem;
+    padding: 12px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+  .map-link-btn:active { opacity: 0.8; }
+  .map-hint {
+    font-size: 0.72rem;
+    color: var(--text-soft);
+    text-align: center;
+    margin-top: 8px;
+  }
+  .error {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-soft);
+  }
+  .error a { color: var(--pink-deep); }
+  footer {
+    text-align: center;
+    padding: 24px 16px 8px;
+    font-size: 0.72rem;
+    color: var(--text-soft);
+  }
+  @media (min-width: 720px) {
+    body { max-width: 760px; margin: 0 auto; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <button class="back-btn" type="button" id="backBtn">← 一覧へ戻る</button>
+  <span class="title">🌸 店舗詳細</span>
+</header>
+
+<div class="wrap" id="content"></div>
+<footer>データ: 田辺市商品券事業 取扱店舗一覧</footer>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  document.getElementById('backBtn').addEventListener('click', () => {
+    if (history.length > 1) history.back();
+    else location.href = 'index.html';
+  });
+
+  const data = window.STORES || [];
+  const i = parseInt(new URLSearchParams(location.search).get('i'), 10);
+  const store = Number.isInteger(i) ? data[i] : null;
+  const content = document.getElementById('content');
+
+  if (!store) {
+    content.innerHTML = `<div class="error">店舗が見つかりませんでした。<br><a href="index.html">店舗一覧へ戻る</a></div>`;
+    return;
+  }
+
+  document.title = `${store.name} | 田辺市商品券 取扱店舗検索`;
+
+  const mapQuery = `${store.name} ${store.place}`;
+  const embedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&z=16&output=embed`;
+  const externalUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapQuery)}`;
+
+  content.innerHTML = `
+    <div class="panel">
+      <div class="store-name">${escapeHtml(store.name)}</div>
+      <div class="badges">
+        <span class="badge badge-cat">${escapeHtml(store.category)}</span>
+        <span class="badge badge-area">${escapeHtml(store.area)}</span>
+        <span class="badge badge-place">📍 ${escapeHtml(store.place)}</span>
+      </div>
+      <div class="items">🛍 ${escapeHtml(store.items)}</div>
+      <div class="map-frame">
+        <iframe src="${embedUrl}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${escapeHtml(store.name)}の地図"></iframe>
+      </div>
+      <div class="map-actions">
+        <a class="map-link-btn" href="${externalUrl}" target="_blank" rel="noopener">Googleマップアプリで開く（経路案内）</a>
+      </div>
+      <div class="map-hint">地図は「${escapeHtml(mapQuery)}」で検索した結果です。実際の所在地と異なる場合があります。</div>
+    </div>
+  `;
+})();
+</script>
+</body>
+</html>

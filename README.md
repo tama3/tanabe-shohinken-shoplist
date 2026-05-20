@@ -5,6 +5,7 @@
 ## 構成
 
 - `index.html` — アプリ本体（HTML + CSS + JS 一体）
+- `detail.html` — 店舗詳細ページ（地図埋め込み表示。`?i=<店舗インデックス>` で店舗を指定）
 - `data.js` — CSV から生成された店舗データ（`window.STORES`）
 - `scripts/convert.mjs` — CSV → `data.js` 変換スクリプト
 - `田辺市商品券事業_*.csv` — 原本データ

@@ -293,6 +293,7 @@
   }
 
   const data = window.STORES || [];
+  data.forEach((d, idx) => { d._i = idx; });
   const state = { query: '', areas: new Set(), categories: new Set() };
 
   const $ = id => document.getElementById(id);
@@ -361,7 +362,7 @@
         <div class="card-meta">
           <span class="badge badge-cat">${escapeHtml(d.category)}</span>
           <span class="badge badge-area">${escapeHtml(d.area)}</span>
-          <a class="badge badge-place" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.name + ' ' + d.place)}" target="_blank" rel="noopener" aria-label="${escapeHtml(d.name)}をGoogleマップで検索">📍 ${escapeHtml(d.place)}</a>
+          <a class="badge badge-place" href="detail.html?i=${d._i}" aria-label="${escapeHtml(d.name)}の詳細・地図を見る">📍 ${escapeHtml(d.place)}</a>
         </div>
         <div class="card-items">🛍 ${highlight(d.items, query)}</div>
       </div>
