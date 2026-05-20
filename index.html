@@ -188,6 +188,12 @@
     color: var(--text);
     word-break: break-word;
   }
+  .card-name .map-link {
+    color: var(--pink-deep);
+    text-decoration: none;
+  }
+  .card-name .map-link:hover { text-decoration: underline; }
+  .card-name .map-link:active { opacity: 0.6; }
   .card-meta {
     display: flex;
     flex-wrap: wrap;
@@ -350,7 +356,7 @@
     }
     const html = items.map(d => `
       <div class="card">
-        <div class="card-name">${highlight(d.name, query)}</div>
+        <div class="card-name"><a class="map-link" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(d.name + ' ' + d.place)}" target="_blank" rel="noopener" aria-label="${escapeHtml(d.name)}をGoogleマップで検索">${highlight(d.name, query)}</a></div>
         <div class="card-meta">
           <span class="badge badge-cat">${escapeHtml(d.category)}</span>
           <span class="badge badge-area">${escapeHtml(d.area)}</span>
